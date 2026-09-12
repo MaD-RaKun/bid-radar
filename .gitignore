@@ -1,3 +1,4 @@
 collector.py
 notices.json
 *.log
+update.ps1
