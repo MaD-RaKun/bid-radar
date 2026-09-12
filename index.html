@@ -1,0 +1,1637 @@
+<title>법률 입찰 레이더</title>
+<meta name="description" content="나라장터 법률·법무 관련 입찰공고 자동 모니터링 대시보드">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#eef1f4;
+    --surface:#ffffff;
+    --surface-2:#f6f8fa;
+    --ink:#1a2230;
+    --ink-2:#4a5568;
+    --ink-3:#7b8494;
+    --line:#dde2e8;
+    --line-strong:#c8d0d9;
+    --accent:#26407a;
+    --accent-soft:#e7edf7;
+    --accent-ink:#1d3563;
+    --urgent:#c0392b;
+    --urgent-soft:#fbeae7;
+    --warn:#b26a12;
+    --warn-soft:#fbf0dd;
+    --ok:#2f7d5b;
+    --ok-soft:#e4f2eb;
+    --new:#7a3ca8;
+    --new-soft:#f1e9f8;
+    --shadow:0 1px 2px rgba(26,34,48,.04),0 4px 16px rgba(26,34,48,.06);
+    --shadow-soft:0 1px 2px rgba(26,34,48,.05);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f131a;
+      --surface:#171c25;
+      --surface-2:#1e242f;
+      --ink:#e8ecf1;
+      --ink-2:#aeb7c4;
+      --ink-3:#79828f;
+      --line:#2a313d;
+      --line-strong:#39424f;
+      --accent:#6f9be0;
+      --accent-soft:#1c2b45;
+      --accent-ink:#a9c4ef;
+      --urgent:#ef6b5c;
+      --urgent-soft:#3a1f1c;
+      --warn:#e0a54d;
+      --warn-soft:#352817;
+      --ok:#5cc294;
+      --ok-soft:#173026;
+      --new:#c79ae8;
+      --new-soft:#291a38;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
+      --shadow-soft:0 1px 2px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f131a;--surface:#171c25;--surface-2:#1e242f;--ink:#e8ecf1;--ink-2:#aeb7c4;--ink-3:#79828f;
+    --line:#2a313d;--line-strong:#39424f;--accent:#6f9be0;--accent-soft:#1c2b45;--accent-ink:#a9c4ef;
+    --urgent:#ef6b5c;--urgent-soft:#3a1f1c;--warn:#e0a54d;--warn-soft:#352817;--ok:#5cc294;--ok-soft:#173026;
+    --new:#c79ae8;--new-soft:#291a38;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);--shadow-soft:0 1px 2px rgba(0,0,0,.3);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans KR",-apple-system,BlinkMacSystemFont,"Malgun Gothic","맑은 고딕",sans-serif;
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:26px 20px 64px}
+  a{color:inherit}
+  .mono{font-family:"IBM Plex Mono","IBM Plex Sans KR",monospace;font-variant-numeric:tabular-nums}
+
+  /* ---- header ---- */
+  header.top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 20px;margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .glyph{
+    width:42px;height:42px;border-radius:11px;flex:none;
+    background:linear-gradient(150deg,var(--accent),color-mix(in srgb,var(--accent) 62%,#000));
+    display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-soft);
+    position:relative;overflow:hidden;
+  }
+  .brand .glyph svg{width:23px;height:23px}
+  .brand h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--ink-3);letter-spacing:.01em}
+  .status{margin-left:auto;display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2);
+    background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;box-shadow:var(--shadow-soft)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--warn);position:relative;flex:none}
+  .dot.live{background:var(--ok)}
+  .dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid currentColor;color:inherit;opacity:.35}
+  .status b{color:var(--ink);font-weight:600}
+  .status .auto{color:var(--ink-3);font-size:11.5px}
+  .refresh{font:inherit;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+    border:1px solid var(--line-strong);background:var(--surface-2);color:var(--accent-ink);
+    padding:5px 10px;border-radius:8px;margin-left:2px;transition:.13s;-webkit-tap-highlight-color:transparent}
+  .refresh:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .refresh:active{transform:scale(.96)}
+  .refresh svg{width:13px;height:13px}
+  .refresh.spin svg{animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---- keyword rail ---- */
+  .rail{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:14px;box-shadow:var(--shadow-soft)}
+  .rail .lab{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--ink-3);text-transform:uppercase;margin-bottom:9px}
+  .kw-list{display:flex;flex-wrap:wrap;gap:8px}
+  .kw{
+    font:inherit;font-size:13px;font-weight:500;cursor:pointer;
+    border:1px solid var(--line-strong);background:var(--surface-2);color:var(--ink-2);
+    padding:6px 13px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;transition:.13s;
+  }
+  .kw:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .kw .n{font-size:11.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+  .kw[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .kw[aria-pressed="true"] .n{color:rgba(255,255,255,.75)}
+
+  /* ---- controls ---- */
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+  .search{position:relative;flex:1 1 260px;min-width:200px}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3)}
+  .search input{
+    width:100%;font:inherit;font-size:14px;color:var(--ink);
+    background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;
+    padding:10px 12px 10px 36px;box-shadow:var(--shadow-soft);
+  }
+  .search input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+  .seg button{font:inherit;font-size:13px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--ink-2);padding:6px 12px;border-radius:7px;transition:.12s;white-space:nowrap}
+  .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-soft);font-weight:600}
+  select.sort{font:inherit;font-size:13.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;padding:9px 30px 9px 12px;cursor:pointer;box-shadow:var(--shadow-soft);
+    appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b8494' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+
+  /* ---- scope (공고기간) ---- */
+  .scopebar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .scope-lab{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase}
+  .scopebar .seg{background:var(--surface);border-color:var(--line-strong)}
+  .scopebar .seg button{padding:7px 15px;font-size:13.5px}
+  .scopebar .seg button[aria-pressed="true"]{background:var(--accent);color:#fff;box-shadow:none}
+  .scope-count{font-size:12.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+  .scope-count b{color:var(--ink-2);font-weight:600}
+
+  /* ---- stats ---- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:14px 15px;box-shadow:var(--shadow-soft);position:relative;overflow:hidden}
+  .stat .k{font-size:12px;color:var(--ink-3);font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .stat .v{font-size:27px;font-weight:700;letter-spacing:-.02em;line-height:1;font-family:"IBM Plex Mono",monospace}
+  .stat .v small{font-size:14px;font-weight:500;color:var(--ink-3);margin-left:3px;font-family:"IBM Plex Sans KR"}
+  .stat.hot .v{color:var(--urgent)}
+  .stat.new .v{color:var(--new)}
+  .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent)}
+  .stat.hot::before{background:var(--urgent)}
+  .stat.new::before{background:var(--new)}
+  .stat.today::before{background:var(--warn)}
+  .stat.today .v{color:var(--warn)}
+
+  /* ---- list ---- */
+  .listhead{display:grid;grid-template-columns:1fr 92px 128px 98px 108px;gap:14px;padding:0 16px 9px;font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--ink-3);text-transform:uppercase}
+  .listhead span:nth-child(n+3){text-align:right}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .row{
+    display:grid;grid-template-columns:1fr 92px 128px 98px 108px;gap:14px;align-items:center;
+    background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:14px 16px 14px 18px;
+    box-shadow:var(--shadow-soft);position:relative;transition:.13s;
+  }
+  .row::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--line-strong)}
+  .row.u-today::before{background:var(--urgent)}
+  .row.u-soon::before{background:var(--warn)}
+  .row.u-open::before{background:var(--ok)}
+  .row.u-closed{opacity:.6}
+  .row:hover{border-color:var(--line-strong);box-shadow:var(--shadow);transform:translateY(-1px)}
+  .cell-main{min-width:0}
+  .title-line{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .row .ttl{font-size:15px;font-weight:600;color:var(--ink);letter-spacing:-.01em;text-decoration:none;line-height:1.35}
+  .row .ttl:hover{color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px}
+  .badge-new{font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--new);background:var(--new-soft);border-radius:5px;padding:2px 6px;flex:none}
+  .meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:7px;font-size:12.5px;color:var(--ink-2)}
+  .meta .inst{font-weight:500;color:var(--ink-2)}
+  .meta .sep{color:var(--line-strong)}
+  .meta .no{font-size:11.5px;color:var(--ink-3)}
+  .kwtags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .kwtag{font-size:11px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);border-radius:5px;padding:2px 7px;letter-spacing:.01em}
+  .cell-cat{text-align:right}
+  .cat-pill{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:6px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+  .cell-price{text-align:right;font-size:14px;font-weight:600;font-family:"IBM Plex Mono",monospace}
+  .cell-price small{display:block;font-size:11px;font-weight:400;color:var(--ink-3);margin-top:2px;font-family:"IBM Plex Sans KR"}
+  .cell-date{text-align:right;font-size:12.5px;color:var(--ink-2);font-family:"IBM Plex Mono",monospace}
+  .cell-clse{text-align:right}
+  .dday{display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .dday .pill{font-size:12.5px;font-weight:700;padding:4px 9px;border-radius:7px;font-family:"IBM Plex Mono",monospace;letter-spacing:.01em}
+  .dday .pill.open{background:var(--ok-soft);color:var(--ok)}
+  .dday .pill.soon{background:var(--warn-soft);color:var(--warn)}
+  .dday .pill.today{background:var(--urgent-soft);color:var(--urgent)}
+  .dday .pill.closed{background:var(--surface-2);color:var(--ink-3)}
+  .dday .date{font-size:11px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+
+  .empty{text-align:center;padding:60px 20px;color:var(--ink-3);background:var(--surface);border:1px dashed var(--line-strong);border-radius:14px}
+  .empty svg{width:34px;height:34px;margin-bottom:12px;opacity:.5}
+  .empty b{display:block;color:var(--ink-2);font-size:15px;font-weight:600;margin-bottom:4px}
+
+  .sample-banner{display:flex;align-items:center;gap:10px;background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);color:var(--warn);border-radius:11px;padding:11px 14px;margin-bottom:14px;font-size:13px;font-weight:500}
+  .sample-banner svg{width:17px;height:17px;flex:none}
+  .sample-banner b{font-weight:700}
+
+  footer{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3);line-height:1.7}
+  footer b{color:var(--ink-2);font-weight:600}
+  footer .kwline{margin-top:4px}
+  footer code{font-family:"IBM Plex Mono",monospace;font-size:11.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+
+  @media (max-width:720px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .listhead{display:none}
+    .row{grid-template-columns:1fr;gap:10px;padding:15px 15px 15px 17px}
+    .cell-cat,.cell-price,.cell-date,.cell-clse{text-align:left}
+    .cell-cat{order:3}
+    .row-secondary{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;border-top:1px dashed var(--line);padding-top:10px}
+    .cell-price small{display:inline;margin-left:4px}
+    .cell-price{display:flex;align-items:baseline;gap:5px}
+    .dday{flex-direction:row;align-items:center;gap:8px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="glyph" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v3M12 6l-7 4 7 4 7-4-7-4Z"/><path d="M5 12v4c0 1.1 3.1 3 7 3s7-1.9 7-3v-4"/>
+        </svg>
+      </div>
+      <div>
+        <h1>법률 입찰 레이더</h1>
+        <p>나라장터 · 법률/법무 관련 입찰공고 자동 모니터링</p>
+      </div>
+    </div>
+    <div class="status">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">마지막 갱신 <b id="updatedAt">—</b></span>
+      <button class="refresh" id="refreshBtn" title="최신 발행본 다시 불러오기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+        새로고침
+      </button>
+    </div>
+  </header>
+
+  <div class="sample-banner" id="sampleBanner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+    <span><b>샘플 데이터입니다.</b> 조달청 오픈API 서비스키가 연결되면 실제 공고로 자동 교체·갱신됩니다.</span>
+  </div>
+
+  <div class="rail">
+    <div class="lab">감시 키워드 — 클릭해서 필터</div>
+    <div class="kw-list" id="kwList"></div>
+  </div>
+
+  <div class="scopebar">
+    <span class="scope-lab">공고기간 (공고일 기준)</span>
+    <div class="seg" id="periodSeg" role="group" aria-label="공고기간">
+      <button data-period="1m" aria-pressed="true">최근 1개월</button>
+      <button data-period="3m" aria-pressed="false">최근 3개월</button>
+      <button data-period="all" aria-pressed="false">전체</button>
+    </div>
+    <span class="scope-count" id="scopeCount"></span>
+  </div>
+
+  <div class="controls">
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="q" placeholder="공고명 · 기관명 검색" autocomplete="off">
+    </label>
+    <div class="seg" id="catSeg" role="group" aria-label="분류">
+      <button data-cat="all" aria-pressed="true">전체</button>
+      <button data-cat="용역" aria-pressed="false">용역</button>
+      <button data-cat="물품" aria-pressed="false">물품</button>
+      <button data-cat="공사" aria-pressed="false">공사</button>
+    </div>
+    <div class="seg" id="statSeg" role="group" aria-label="상태">
+      <button data-stat="all" aria-pressed="true">전체</button>
+      <button data-stat="open" aria-pressed="false">진행중</button>
+      <button data-stat="soon" aria-pressed="false">마감임박</button>
+      <button data-stat="closed" aria-pressed="false">마감</button>
+    </div>
+    <select class="sort" id="sort" aria-label="정렬">
+      <option value="clse-asc">마감 임박순</option>
+      <option value="ntce-desc">공고 최신순</option>
+      <option value="price-desc">추정가격 높은순</option>
+    </select>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="listhead">
+    <span>공고명 / 수요기관</span><span>분류</span><span>추정가격</span><span>공고일</span><span>입찰마감</span>
+  </div>
+  <div class="list" id="list"></div>
+
+  <footer>
+    <b>데이터 출처</b> — 조달청 나라장터 입찰공고정보서비스(공공데이터포털 <code>apis.data.go.kr/1230000/BidPublicInfoService</code>). 공고명에 감시 키워드가 포함된 건만 수집합니다.
+    <div class="kwline"><b>감시 키워드</b> — <span id="kwFootnote"></span></div>
+    <div class="kwline">추정가격·마감일 등은 원문 공고 기준이며, 최종 확인은 반드시 <b>상세보기</b>의 나라장터 원문을 확인하세요. 갱신은 매일 자동으로 이뤄집니다.</div>
+  </footer>
+</div>
+
+<script type="application/json" id="bid-data">
+{
+ "updatedAt": "202609121049",
+ "isSample": false,
+ "keywords": [
+  "변호사",
+  "법무법인",
+  "표준계약서",
+  "법무",
+  "법률"
+ ],
+ "notices": [
+  {
+   "bidNtceNo": "R26BK01725522",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "청정수소 인증운영기관 법률자문(사) 위촉",
+   "ntceInsttNm": "에너지경제연구원",
+   "dminsttNm": "에너지경제연구원",
+   "category": "용역",
+   "bidNtceDt": "2026-09-11 14:33:26",
+   "bidClseDt": "",
+   "opengDt": "2026-09-22 16:00:00",
+   "presmptPrce": "136363636",
+   "asignBdgtAmt": "150000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01725522&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01710589",
+   "bidNtceOrd": "001",
+   "bidNtceNm": "AX-sprint K-ACC Guard 국외 시장 진입을 위한 법률 검토 및 규제/표준화 컨설팅 용역",
+   "ntceInsttNm": "주식회사 바이다",
+   "dminsttNm": "주식회사 바이다",
+   "category": "용역",
+   "bidNtceDt": "2026-09-11 13:50:54",
+   "bidClseDt": "2026-09-21 14:00:00",
+   "opengDt": "2026-09-21 15:00:00",
+   "presmptPrce": "250000000",
+   "asignBdgtAmt": "275000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01710589&bidPbancOrd=001"
+  },
+  {
+   "bidNtceNo": "R26BK01724644",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "화합물반도체 전략 파운드리 구축을 위한 법률자문 ",
+   "ntceInsttNm": "재단법인 한국나노기술원",
+   "dminsttNm": "재단법인 한국나노기술원",
+   "category": "용역",
+   "bidNtceDt": "2026-09-11 10:07:08",
+   "bidClseDt": "2026-09-22 14:00:00",
+   "opengDt": "2026-09-22 15:00:00",
+   "presmptPrce": "118181818",
+   "asignBdgtAmt": "130000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01724644&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01719963",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "2027년 구조고도화 사업 법률 자문 용역",
+   "ntceInsttNm": "한국산업단지공단",
+   "dminsttNm": "한국산업단지공단",
+   "category": "용역",
+   "bidNtceDt": "2026-09-09 17:51:56",
+   "bidClseDt": "2026-09-22 10:00:00",
+   "opengDt": "2026-09-22 11:00:00",
+   "presmptPrce": "200000000",
+   "asignBdgtAmt": "220000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01719963&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01699143",
+   "bidNtceOrd": "001",
+   "bidNtceNm": "2027년 구조고도화 사업 법률 자문 용역",
+   "ntceInsttNm": "한국산업단지공단",
+   "dminsttNm": "한국산업단지공단",
+   "category": "용역",
+   "bidNtceDt": "2026-09-08 09:41:44",
+   "bidClseDt": "2026-09-08 10:00:00",
+   "opengDt": "2026-09-08 11:00:00",
+   "presmptPrce": "200000000",
+   "asignBdgtAmt": "220000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01699143&bidPbancOrd=001"
+  },
+  {
+   "bidNtceNo": "R26BK01714624",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "CCU 업무규정 제정 및 법률자문 용역",
+   "ntceInsttNm": "한국화학연구원",
+   "dminsttNm": "한국화학연구원",
+   "category": "용역",
+   "bidNtceDt": "2026-09-04 16:42:29",
+   "bidClseDt": "2026-09-15 10:00:00",
+   "opengDt": "2026-09-15 11:00:00",
+   "presmptPrce": "50000000",
+   "asignBdgtAmt": "55000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01714624&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01711549",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "구상채권 법률자문 및 소송 전담 변호사 선정",
+   "ntceInsttNm": "서민금융진흥원",
+   "dminsttNm": "서민금융진흥원",
+   "category": "용역",
+   "bidNtceDt": "2026-09-03 10:48:35",
+   "bidClseDt": "2026-09-14 16:00:00",
+   "opengDt": "2026-09-14 17:00:00",
+   "presmptPrce": "43927273",
+   "asignBdgtAmt": "48320000",
+   "matchedKeywords": [
+    "변호사",
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01711549&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01705963",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "법무정보 통합플랫폼 기반 구축 사업",
+   "ntceInsttNm": "주택도시보증공사",
+   "dminsttNm": "주택도시보증공사",
+   "category": "용역",
+   "bidNtceDt": "2026-08-31 15:39:48",
+   "bidClseDt": "2026-09-11 10:00:00",
+   "opengDt": "2026-09-11 11:00:00",
+   "presmptPrce": "320950909",
+   "asignBdgtAmt": "353046000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01705963&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01703324",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "「국가 감염병 병상 통합 및 지정체계 정비 법률 검토 연구」 연구용역",
+   "ntceInsttNm": "국립중앙의료원",
+   "dminsttNm": "국립중앙의료원",
+   "category": "용역",
+   "bidNtceDt": "2026-08-28 14:08:34",
+   "bidClseDt": "2026-09-08 11:00:00",
+   "opengDt": "2026-09-08 12:00:00",
+   "presmptPrce": "27272727",
+   "asignBdgtAmt": "30000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01703324&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01702997",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "청정수소 인증운영기관 법률자문(사) 위촉",
+   "ntceInsttNm": "에너지경제연구원",
+   "dminsttNm": "에너지경제연구원",
+   "category": "용역",
+   "bidNtceDt": "2026-08-28 11:18:43",
+   "bidClseDt": "",
+   "opengDt": "2026-09-08 16:00:00",
+   "presmptPrce": "136363636",
+   "asignBdgtAmt": "150000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01702997&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01690042",
+   "bidNtceOrd": "001",
+   "bidNtceNm": "화합물반도체 전략 파운드리 구축을 위한 법률자문 ",
+   "ntceInsttNm": "재단법인 한국나노기술원",
+   "dminsttNm": "재단법인 한국나노기술원",
+   "category": "용역",
+   "bidNtceDt": "2026-08-28 08:17:19",
+   "bidClseDt": "2026-09-07 14:00:00",
+   "opengDt": "2026-09-07 15:00:00",
+   "presmptPrce": "118181818",
+   "asignBdgtAmt": "130000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01690042&bidPbancOrd=001"
+  },
+  {
+   "bidNtceNo": "R26BK01689633",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "인도네시아 남땅그랑 폐기물에너지화 플랜트 건설사업 시장/재무/법률분석 부문",
+   "ntceInsttNm": "(주)도화엔지니어링",
+   "dminsttNm": "(주)도화엔지니어링",
+   "category": "용역",
+   "bidNtceDt": "2026-08-20 11:21:05",
+   "bidClseDt": "2026-08-21 15:00:00",
+   "opengDt": "2026-08-21 16:00:00",
+   "presmptPrce": "98000000",
+   "asignBdgtAmt": "107800000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01689633&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01689747",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "한국법무보호복지공단 2026년 신입직원 채용 대행 용역",
+   "ntceInsttNm": "한국법무보호복지공단",
+   "dminsttNm": "한국법무보호복지공단",
+   "category": "용역",
+   "bidNtceDt": "2026-08-20 10:16:10",
+   "bidClseDt": "2026-08-31 15:00:00",
+   "opengDt": "2026-09-02 17:30:00",
+   "presmptPrce": "84048273",
+   "asignBdgtAmt": "92453100",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01689747&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01681952",
+   "bidNtceOrd": "001",
+   "bidNtceNm": "세월호 참사 피해 생존자 추가 배상 관련 법률서비스·손해사정 용역",
+   "ntceInsttNm": "해양수산부",
+   "dminsttNm": "해양수산부",
+   "category": "용역",
+   "bidNtceDt": "2026-08-19 14:31:21",
+   "bidClseDt": "2026-08-31 10:00:00",
+   "opengDt": "2026-08-31 11:00:00",
+   "presmptPrce": "136363636",
+   "asignBdgtAmt": "150000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01681952&bidPbancOrd=001"
+  },
+  {
+   "bidNtceNo": "R26BK01685582",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "26-F-법무실 등 신축 전기감리용역(D016)",
+   "ntceInsttNm": "국방부 국군재정관리단",
+   "dminsttNm": "국방부 국군재정관리단",
+   "category": "용역",
+   "bidNtceDt": "2026-08-18 13:55:57",
+   "bidClseDt": "2026-09-02 10:00:00",
+   "opengDt": "2026-09-02 11:00:00",
+   "presmptPrce": "625740909",
+   "asignBdgtAmt": "688315000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01685582&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01679543",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "2026년 규제특례지원단 로봇관련 법률컨설팅",
+   "ntceInsttNm": "한국로봇산업진흥원",
+   "dminsttNm": "한국로봇산업진흥원",
+   "category": "용역",
+   "bidNtceDt": "2026-08-14 11:06:36",
+   "bidClseDt": "2026-08-18 12:00:00",
+   "opengDt": "2026-08-18 13:00:00",
+   "presmptPrce": "19500000",
+   "asignBdgtAmt": "21450000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01679543&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01673959",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "변호사보수 소송비용 산입 기준에 관한 연구",
+   "ntceInsttNm": "대법원",
+   "dminsttNm": "대법원",
+   "category": "용역",
+   "bidNtceDt": "2026-08-11 08:02:46",
+   "bidClseDt": "2026-08-27 10:00:00",
+   "opengDt": "2026-08-27 11:00:00",
+   "presmptPrce": "45454545",
+   "asignBdgtAmt": "50000000",
+   "matchedKeywords": [
+    "변호사"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01673959&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01673274",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "한국디자인진흥원 법률자문 변호사 선정",
+   "ntceInsttNm": "한국디자인진흥원",
+   "dminsttNm": "한국디자인진흥원",
+   "category": "용역",
+   "bidNtceDt": "2026-08-10 09:52:43",
+   "bidClseDt": "2026-08-21 14:00:00",
+   "opengDt": "2026-08-21 15:00:00",
+   "presmptPrce": "32467174",
+   "asignBdgtAmt": "35713891",
+   "matchedKeywords": [
+    "변호사",
+    "법률"
+   ],
+   "collectedAt": "20260912",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01673274&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01660060",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "디지털크리에이터 표준계약서 배포안 마련 용역",
+   "ntceInsttNm": "특수법인 한국전파진흥협회",
+   "dminsttNm": "특수법인 한국전파진흥협회",
+   "category": "용역",
+   "bidNtceDt": "2026-08-06 11:22:51",
+   "bidClseDt": "2026-08-20 10:00:00",
+   "opengDt": "2026-08-20 11:00:00",
+   "presmptPrce": "36363636",
+   "asignBdgtAmt": "40000000",
+   "matchedKeywords": [
+    "표준계약서"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01660060&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01665674",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "(주)사이넷_해외법인 설립 및 법률 컨설팅",
+   "ntceInsttNm": "(주)한국능률협회컨설팅",
+   "dminsttNm": "(주)한국능률협회컨설팅",
+   "category": "용역",
+   "bidNtceDt": "2026-08-04 15:34:20",
+   "bidClseDt": "2026-08-18 10:00:00",
+   "opengDt": "2026-08-18 11:00:00",
+   "presmptPrce": "35000000",
+   "asignBdgtAmt": "38500000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01665674&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01664301",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "사례로 배우는 시민 생활법률",
+   "ntceInsttNm": "한국법제연구원",
+   "dminsttNm": "한국법제연구원",
+   "category": "용역",
+   "bidNtceDt": "2026-08-04 09:45:09",
+   "bidClseDt": "2026-08-20 10:00:00",
+   "opengDt": "2026-08-20 11:00:00",
+   "presmptPrce": "45454545",
+   "asignBdgtAmt": "50000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01664301&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01661928",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "친환경 법무부 감시정 건조 사업 책임감리용역 ",
+   "ntceInsttNm": "법무부 인천출입국.외국인청",
+   "dminsttNm": "법무부 인천출입국.외국인청",
+   "category": "용역",
+   "bidNtceDt": "2026-08-03 11:09:18",
+   "bidClseDt": "2026-08-14 12:00:00",
+   "opengDt": "2026-08-14 13:00:00",
+   "presmptPrce": "53792727",
+   "asignBdgtAmt": "59172000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01661928&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01658813",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "차세대 법률정보 통합시스템 구축 1단계 사업 감리용역",
+   "ntceInsttNm": "헌법재판소",
+   "dminsttNm": "헌법재판소",
+   "category": "용역",
+   "bidNtceDt": "2026-07-30 17:35:55",
+   "bidClseDt": "2026-08-10 10:00:00",
+   "opengDt": "2026-08-10 11:00:00",
+   "presmptPrce": "50605000",
+   "asignBdgtAmt": "55665500",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01658813&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01655907",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "정부법무공단 업무용 차량 임차(렌탈) 용역 입찰",
+   "ntceInsttNm": "정부법무공단",
+   "dminsttNm": "정부법무공단",
+   "category": "용역",
+   "bidNtceDt": "2026-07-29 10:44:09",
+   "bidClseDt": "2026-08-06 11:00:00",
+   "opengDt": "2026-08-06 12:00:00",
+   "presmptPrce": "50500000",
+   "asignBdgtAmt": "55550000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01655907&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01655418",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "국제기구분담금 관리에 관한 법률 개정 및 이행 강화 방안 연구",
+   "ntceInsttNm": "외교부",
+   "dminsttNm": "외교부",
+   "category": "용역",
+   "bidNtceDt": "2026-07-29 06:29:55",
+   "bidClseDt": "2026-08-10 12:00:00",
+   "opengDt": "2026-08-10 13:00:00",
+   "presmptPrce": "27272727",
+   "asignBdgtAmt": "30000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01655418&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01654386",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "초고령사회 고령 출소자의 재범방지를 위한 보호사업 연구_한국법무보호복지공단의 취업지원 사업을 중심으로",
+   "ntceInsttNm": "한국법무보호복지공단 법무보호교육원",
+   "dminsttNm": "한국법무보호복지공단 법무보호교육원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-28 16:53:12",
+   "bidClseDt": "2026-08-10 10:50:00",
+   "opengDt": "2026-08-10 11:50:00",
+   "presmptPrce": "18181818",
+   "asignBdgtAmt": "20000000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01654386&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01649728",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "법무부 상주외국인보호소 부지조성사업 실시설계",
+   "ntceInsttNm": "경상북도 상주시",
+   "dminsttNm": "경상북도 상주시",
+   "category": "용역",
+   "bidNtceDt": "2026-07-24 15:52:23",
+   "bidClseDt": "2026-07-30 10:00:00",
+   "opengDt": "2026-07-30 11:00:00",
+   "presmptPrce": "95454545",
+   "asignBdgtAmt": "105000000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01649728&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01649209",
+   "bidNtceOrd": "001",
+   "bidNtceNm": "(주)사이넷_해외법인 설립 및 법률 컨설팅",
+   "ntceInsttNm": "(주)한국능률협회컨설팅",
+   "dminsttNm": "(주)한국능률협회컨설팅",
+   "category": "용역",
+   "bidNtceDt": "2026-07-24 14:08:40",
+   "bidClseDt": "2026-08-04 10:00:00",
+   "opengDt": "2026-08-04 11:00:00",
+   "presmptPrce": "35000000",
+   "asignBdgtAmt": "38500000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01649209&bidPbancOrd=001"
+  },
+  {
+   "bidNtceNo": "R26BK01646272",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "의생명연구원 법률자문 수행 용역",
+   "ntceInsttNm": "분당서울대학교병원",
+   "dminsttNm": "분당서울대학교병원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-23 09:56:22",
+   "bidClseDt": "",
+   "opengDt": "2026-07-31 11:00:00",
+   "presmptPrce": "39000000",
+   "asignBdgtAmt": "42900000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01646272&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01645083",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "국립법무병원을 중심으로 한 치료감호 집행 방식 다층화 방안 연구 용역",
+   "ntceInsttNm": "법무부 국립법무병원",
+   "dminsttNm": "법무부 국립법무병원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-22 16:17:27",
+   "bidClseDt": "2026-07-24 15:00:00",
+   "opengDt": "2026-07-24 16:00:00",
+   "presmptPrce": "29090909",
+   "asignBdgtAmt": "32000000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01645083&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01638552",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "포항 외국교육기관 설립 법률 검토 용역",
+   "ntceInsttNm": "경상북도 포항시",
+   "dminsttNm": "경상북도 포항시",
+   "category": "용역",
+   "bidNtceDt": "2026-07-20 18:40:12",
+   "bidClseDt": "",
+   "opengDt": "2026-07-31 10:00:00",
+   "presmptPrce": "9090909",
+   "asignBdgtAmt": "10000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01638552&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01639195",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "법무부 춘천소년원 직원식당 위탁운영(이동급식) 용역",
+   "ntceInsttNm": "법무부 춘천소년원",
+   "dminsttNm": "법무부 춘천소년원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-20 11:49:47",
+   "bidClseDt": "2026-07-31 10:00:00",
+   "opengDt": "2026-07-31 11:00:00",
+   "presmptPrce": "85800000",
+   "asignBdgtAmt": "94380000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01639195&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01633312",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "변호사보수 소송비용 산입 기준에 관한 연구",
+   "ntceInsttNm": "대법원",
+   "dminsttNm": "대법원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-20 07:57:48",
+   "bidClseDt": "2026-07-31 10:00:00",
+   "opengDt": "2026-07-31 11:00:00",
+   "presmptPrce": "45454545",
+   "asignBdgtAmt": "50000000",
+   "matchedKeywords": [
+    "변호사"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01633312&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01634983",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "사례로 배우는 시민 생활법률",
+   "ntceInsttNm": "한국법제연구원",
+   "dminsttNm": "한국법제연구원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-15 15:26:05",
+   "bidClseDt": "2026-07-28 10:00:00",
+   "opengDt": "2026-07-28 11:00:00",
+   "presmptPrce": "45454545",
+   "asignBdgtAmt": "50000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01634983&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01634334",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "초고령사회 고령 출소자의 재범방지를 위한 보호사업 연구_한국법무보호복지공단의 취업지원 사업을 중심으로",
+   "ntceInsttNm": "한국법무보호복지공단 법무보호교육원",
+   "dminsttNm": "한국법무보호복지공단 법무보호교육원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-15 11:51:12",
+   "bidClseDt": "2026-07-28 12:00:00",
+   "opengDt": "2026-07-28 13:23:00",
+   "presmptPrce": "18181818",
+   "asignBdgtAmt": "20000000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01634334&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01630364",
+   "bidNtceOrd": "001",
+   "bidNtceNm": "법무부 상주외국인보호소 부지조성사업 실시설계",
+   "ntceInsttNm": "경상북도 상주시",
+   "dminsttNm": "경상북도 상주시",
+   "category": "용역",
+   "bidNtceDt": "2026-07-15 10:14:44",
+   "bidClseDt": "2026-07-21 10:00:00",
+   "opengDt": "2026-07-21 11:00:00",
+   "presmptPrce": "108000000",
+   "asignBdgtAmt": "118800000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01630364&bidPbancOrd=001"
+  },
+  {
+   "bidNtceNo": "R26BK01627657",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "전자장치 부착 잠정조치 법무부·경찰청 시스템 연계 사업 감리",
+   "ntceInsttNm": "법무부 위치추적중앙관제센터",
+   "dminsttNm": "법무부 위치추적중앙관제센터",
+   "category": "용역",
+   "bidNtceDt": "2026-07-14 10:17:10",
+   "bidClseDt": "2026-07-28 10:00:00",
+   "opengDt": "2026-07-28 11:00:00",
+   "presmptPrce": "77905591",
+   "asignBdgtAmt": "85696150",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01627657&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01631130",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "IITP 법률자문 법무법인 선정",
+   "ntceInsttNm": "한국연구재단 정보통신기획평가원",
+   "dminsttNm": "한국연구재단 정보통신기획평가원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-14 08:48:53",
+   "bidClseDt": "2026-07-28 10:00:00",
+   "opengDt": "2026-07-28 11:00:00",
+   "presmptPrce": "9",
+   "asignBdgtAmt": "10",
+   "matchedKeywords": [
+    "법무법인",
+    "법무",
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01631130&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01620011",
+   "bidNtceOrd": "001",
+   "bidNtceNm": "법무부 춘천소년원 직원식당 위탁운영(이동급식) 용역",
+   "ntceInsttNm": "법무부 춘천소년원",
+   "dminsttNm": "법무부 춘천소년원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-13 09:24:19",
+   "bidClseDt": "2026-07-20 10:00:00",
+   "opengDt": "2026-07-20 11:00:00",
+   "presmptPrce": "85800000",
+   "asignBdgtAmt": "94380000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01620011&bidPbancOrd=001"
+  },
+  {
+   "bidNtceNo": "R26BK01622857",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "감염병 대응 비대면 진료 플랫폼 총괄 실증 및 사업화를 위한 법률 자문",
+   "ntceInsttNm": "가톨릭대학교 산학협력단",
+   "dminsttNm": "가톨릭대학교 산학협력단",
+   "category": "용역",
+   "bidNtceDt": "2026-07-08 13:26:44",
+   "bidClseDt": "",
+   "opengDt": "2026-07-21 10:00:00",
+   "presmptPrce": "107000000",
+   "asignBdgtAmt": "117700000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01622857&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01621251",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "2026년 센터 변제공탁(상속) 법률사무 대행 용역",
+   "ntceInsttNm": "서울주택도시개발공사",
+   "dminsttNm": "서울주택도시개발공사",
+   "category": "용역",
+   "bidNtceDt": "2026-07-07 16:24:09",
+   "bidClseDt": "2026-07-15 10:00:00",
+   "opengDt": "2026-07-15 11:00:00",
+   "presmptPrce": "55018800",
+   "asignBdgtAmt": "60520680",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01621251&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01618202",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "애니라이트스쿨 평택대표사무소 법률자문 용역",
+   "ntceInsttNm": "애니라이트스쿨 평택대표사무소",
+   "dminsttNm": "애니라이트스쿨 평택대표사무소",
+   "category": "용역",
+   "bidNtceDt": "2026-07-06 14:47:55",
+   "bidClseDt": "2026-07-27 10:00:00",
+   "opengDt": "2026-07-27 11:00:00",
+   "presmptPrce": "90909091",
+   "asignBdgtAmt": "100000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01618202&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01614589",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "(주)사이넷_해외법인 설립 및 법률 컨설팅",
+   "ntceInsttNm": "(주)한국능률협회컨설팅",
+   "dminsttNm": "(주)한국능률협회컨설팅",
+   "category": "용역",
+   "bidNtceDt": "2026-07-02 22:08:33",
+   "bidClseDt": "2026-07-14 10:00:00",
+   "opengDt": "2026-07-14 11:00:00",
+   "presmptPrce": "35000000",
+   "asignBdgtAmt": "38500000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01614589&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01613354",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "의생명연구원 법률자문 수행 용역",
+   "ntceInsttNm": "분당서울대학교병원",
+   "dminsttNm": "분당서울대학교병원",
+   "category": "용역",
+   "bidNtceDt": "2026-07-02 13:25:27",
+   "bidClseDt": "",
+   "opengDt": "2026-07-10 11:00:00",
+   "presmptPrce": "39000000",
+   "asignBdgtAmt": "42900000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01613354&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01611405",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "활 관련 규제를 위한 총포화약등 안전관리법률 하위법령 개정 연구용역",
+   "ntceInsttNm": "경찰청",
+   "dminsttNm": "경찰청",
+   "category": "용역",
+   "bidNtceDt": "2026-07-01 14:49:45",
+   "bidClseDt": "2026-07-13 10:00:00",
+   "opengDt": "2026-07-13 11:00:00",
+   "presmptPrce": "32240587",
+   "asignBdgtAmt": "35464646",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01611405&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01611069",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "자유무역지역 지정 및 운영에 관한 법률 하위법령 개정 방안 연구",
+   "ntceInsttNm": "산업통상부",
+   "dminsttNm": "산업통상부",
+   "category": "용역",
+   "bidNtceDt": "2026-07-01 13:30:43",
+   "bidClseDt": "2026-07-13 10:00:00",
+   "opengDt": "2026-07-13 11:00:00",
+   "presmptPrce": "90374191",
+   "asignBdgtAmt": "99411610",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01611069&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01609428",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "인도네시아 남땅그랑 폐기물에너지화 플랜트 건설사업 시장/재무/법률분석 부문",
+   "ntceInsttNm": "(주)도화엔지니어링",
+   "dminsttNm": "(주)도화엔지니어링",
+   "category": "용역",
+   "bidNtceDt": "2026-06-30 15:34:41",
+   "bidClseDt": "2026-07-07 14:00:00",
+   "opengDt": "2026-07-07 15:00:00",
+   "presmptPrce": "98000000",
+   "asignBdgtAmt": "107800000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01609428&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01609168",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "K-브랜드 정부인증제도 플랫폼 사업 해외 데이터 수집 및 위조대응 법률자문 용역",
+   "ntceInsttNm": "한국조폐공사",
+   "dminsttNm": "한국조폐공사",
+   "category": "용역",
+   "bidNtceDt": "2026-06-30 14:27:18",
+   "bidClseDt": "2026-07-07 10:00:00",
+   "opengDt": "2026-07-07 11:00:00",
+   "presmptPrce": "50000000",
+   "asignBdgtAmt": "55000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01609168&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01605611",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "군인공제회 법무사 선정(중구 회현동 사업 공탁금 회수 용역)",
+   "ntceInsttNm": "군인공제회",
+   "dminsttNm": "군인공제회",
+   "category": "용역",
+   "bidNtceDt": "2026-06-29 08:37:20",
+   "bidClseDt": "2026-07-08 17:00:00",
+   "opengDt": "2026-07-08 18:00:00",
+   "presmptPrce": "937437",
+   "asignBdgtAmt": "1031181",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01605611&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01579573",
+   "bidNtceOrd": "001",
+   "bidNtceNm": "자유무역지역 지정 및 운영에 관한 법률 하위법령 개정 방안 연구",
+   "ntceInsttNm": "산업통상부",
+   "dminsttNm": "산업통상부",
+   "category": "용역",
+   "bidNtceDt": "2026-06-25 16:55:11",
+   "bidClseDt": "2026-07-01 10:00:00",
+   "opengDt": "2026-07-01 11:00:00",
+   "presmptPrce": "90374191",
+   "asignBdgtAmt": "99411610",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01579573&bidPbancOrd=001"
+  },
+  {
+   "bidNtceNo": "R26BK01600414",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "K-브랜드 정부인증제도 플랫폼 사업 해외 데이터 수집 및 위조대응 법률자문 용역",
+   "ntceInsttNm": "한국조폐공사",
+   "dminsttNm": "한국조폐공사",
+   "category": "용역",
+   "bidNtceDt": "2026-06-24 14:56:49",
+   "bidClseDt": "2026-06-30 10:00:00",
+   "opengDt": "2026-06-30 11:00:00",
+   "presmptPrce": "50000000",
+   "asignBdgtAmt": "55000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01600414&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01599111",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "의생명연구원 법률자문 수행 용역",
+   "ntceInsttNm": "분당서울대학교병원",
+   "dminsttNm": "분당서울대학교병원",
+   "category": "용역",
+   "bidNtceDt": "2026-06-24 09:05:18",
+   "bidClseDt": "",
+   "opengDt": "2026-07-02 11:00:00",
+   "presmptPrce": "39000000",
+   "asignBdgtAmt": "42900000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01599111&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01596654",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "새도약기금(주) 채권 법률지원 용역",
+   "ntceInsttNm": "한국자산관리공사",
+   "dminsttNm": "한국자산관리공사",
+   "category": "용역",
+   "bidNtceDt": "2026-06-23 09:58:39",
+   "bidClseDt": "2026-08-03 17:00:00",
+   "opengDt": "2026-08-12 10:00:00",
+   "presmptPrce": "785520000",
+   "asignBdgtAmt": "864072000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01596654&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01592319",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "인도네시아 남땅그랑 폐기물에너지화 플랜트 건설사업 시장/재무/법률분석 부문",
+   "ntceInsttNm": "(주)도화엔지니어링",
+   "dminsttNm": "(주)도화엔지니어링",
+   "category": "용역",
+   "bidNtceDt": "2026-06-22 14:38:28",
+   "bidClseDt": "2026-06-30 14:00:00",
+   "opengDt": "2026-06-30 15:00:00",
+   "presmptPrce": "98000000",
+   "asignBdgtAmt": "107800000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01592319&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01593601",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "2026년 국립법무병원 정책연구 용역 (국립법무병원을 중심으로 한 치료감호 집행 방식 다층화 방안 연구)",
+   "ntceInsttNm": "법무부 국립법무병원",
+   "dminsttNm": "법무부 국립법무병원",
+   "category": "용역",
+   "bidNtceDt": "2026-06-22 08:52:03",
+   "bidClseDt": "2026-07-03 10:00:00",
+   "opengDt": "2026-07-03 11:00:00",
+   "presmptPrce": "29090909",
+   "asignBdgtAmt": "32000000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01593601&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01586722",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "위험물시설 점검업 신설 개정법률의 현장 적용성 제고를 위한 하위법령 입안 등에 관한 연구",
+   "ntceInsttNm": "소방청",
+   "dminsttNm": "소방청",
+   "category": "용역",
+   "bidNtceDt": "2026-06-18 09:38:25",
+   "bidClseDt": "2026-06-30 10:00:00",
+   "opengDt": "2026-06-30 11:00:00",
+   "presmptPrce": "45454545",
+   "asignBdgtAmt": "50000000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01586722&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01588060",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "전용교육원 임대차보증금 회수를 위한 강제집행 등 법무 수행 용역(재공고)",
+   "ntceInsttNm": "한국원자력안전재단",
+   "dminsttNm": "한국원자력안전재단",
+   "category": "용역",
+   "bidNtceDt": "2026-06-17 18:09:21",
+   "bidClseDt": "2026-06-29 10:00:00",
+   "opengDt": "2026-06-29 11:00:00",
+   "presmptPrce": "46272727",
+   "asignBdgtAmt": "50900000",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01588060&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01585335",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "변호사시험 CBT 전자법전 프로그램 연구개발",
+   "ntceInsttNm": "법무부",
+   "dminsttNm": "법무부",
+   "category": "용역",
+   "bidNtceDt": "2026-06-16 18:30:48",
+   "bidClseDt": "2026-06-29 10:00:00",
+   "opengDt": "2026-06-29 11:00:00",
+   "presmptPrce": "45454545",
+   "asignBdgtAmt": "50000000",
+   "matchedKeywords": [
+    "변호사"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01585335&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01579091",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "활 관련 규제를 위한 총포화약등 안전관리법률 하위법령 개정 연구용역",
+   "ntceInsttNm": "경찰청",
+   "dminsttNm": "경찰청",
+   "category": "용역",
+   "bidNtceDt": "2026-06-16 09:33:50",
+   "bidClseDt": "2026-06-29 10:00:00",
+   "opengDt": "2026-06-29 11:00:00",
+   "presmptPrce": "32240587",
+   "asignBdgtAmt": "35464646",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01579091&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01580284",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "26~28년 해외사업 법률 자문용역",
+   "ntceInsttNm": "인천국제공항공사",
+   "dminsttNm": "인천국제공항공사",
+   "category": "용역",
+   "bidNtceDt": "2026-06-16 08:18:21",
+   "bidClseDt": "2026-07-16 14:00:00",
+   "opengDt": "2026-07-16 15:00:00",
+   "presmptPrce": "739200000",
+   "asignBdgtAmt": "813120000",
+   "matchedKeywords": [
+    "법률"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01580284&bidPbancOrd=000"
+  },
+  {
+   "bidNtceNo": "R26BK01580685",
+   "bidNtceOrd": "000",
+   "bidNtceNm": "전자장치 부착 잠정조치 법무부-경찰청 시스템 연계",
+   "ntceInsttNm": "조달청 서울지방조달청",
+   "dminsttNm": "법무부 위치추적중앙관제센터",
+   "category": "용역",
+   "bidNtceDt": "2026-06-15 15:10:45",
+   "bidClseDt": "2026-06-26 11:00:00",
+   "opengDt": "2026-06-26 12:00:00",
+   "presmptPrce": "453825118",
+   "asignBdgtAmt": "503311600",
+   "matchedKeywords": [
+    "법무"
+   ],
+   "collectedAt": "20260911",
+   "bidNtceDtlUrl": "https://www.g2b.go.kr/link/PNPE027_01/single/?bidPbancNo=R26BK01580685&bidPbancOrd=000"
+  }
+ ]
+}
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var DATA;
+  try { DATA = JSON.parse(document.getElementById("bid-data").textContent); }
+  catch(e){ DATA = {notices:[],keywords:[],isSample:true,updatedAt:null}; }
+
+  var KEYWORDS = DATA.keywords || [];
+  var NOTICES = (DATA.notices || []).slice();
+
+  var state = { q:"", cat:"all", stat:"all", sort:"clse-asc", period:"1m", kw:new Set() };
+  var NOW = new Date();
+  var PERIOD_DAYS = { "1m":31, "3m":93, "all":100000 };
+
+  // ---- date helpers ----
+  function parseK(s){
+    if(!s) return null;
+    var d = String(s).replace(/[^0-9]/g,"");
+    if(d.length<8) return null;
+    var y=+d.slice(0,4), mo=+d.slice(4,6)-1, da=+d.slice(6,8);
+    var h=d.length>=10?+d.slice(8,10):0, mi=d.length>=12?+d.slice(10,12):0;
+    var dt=new Date(y,mo,da,h,mi);
+    return isNaN(dt.getTime())?null:dt;
+  }
+  function fmtDate(s){ var dt=parseK(s); if(!dt) return "—"; return (dt.getMonth()+1)+"."+dt.getDate(); }
+  function fmtFull(s){ var dt=parseK(s); if(!dt) return "—";
+    return dt.getFullYear()+"."+pad(dt.getMonth()+1)+"."+pad(dt.getDate()); }
+  function pad(n){ return n<10?"0"+n:""+n; }
+  function dayDiff(dt){
+    var a=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+    var b=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
+    return Math.round((b-a)/86400000);
+  }
+  function urgency(n){
+    var dt=parseK(n.bidClseDt); if(!dt) return {cls:"open",label:"—",diff:9999};
+    var diff=dayDiff(dt);
+    if(diff<0) return {cls:"closed",label:"마감",diff:diff};
+    if(diff===0) return {cls:"today",label:"오늘 마감",diff:0};
+    if(diff<=7) return {cls:"soon",label:"D-"+diff,diff:diff};
+    return {cls:"open",label:"D-"+diff,diff:diff};
+  }
+  function isNew(n){ var dt=parseK(n.collectedAt||n.bidNtceDt); if(!dt) return false; return dayDiff(dt)>=-3; }
+  function money(v){
+    var num=parseInt(String(v).replace(/[^0-9]/g,""),10);
+    if(!num||isNaN(num)) return {main:"—",sub:""};
+    var sub="";
+    if(num>=100000000) sub=(num/100000000).toFixed(num%100000000===0?0:1)+"억원";
+    else if(num>=10000) sub=Math.round(num/10000).toLocaleString("ko-KR")+"만원";
+    return {main:num.toLocaleString("ko-KR"), sub:sub};
+  }
+
+  // ---- filter + sort ----
+  function postedWithin(n,days){
+    var dt=parseK(n.bidNtceDt); if(!dt) return false;
+    return -dayDiff(dt) <= days;   // 공고일이 오늘로부터 days일 이내
+  }
+  function inPeriod(n){ return postedWithin(n, PERIOD_DAYS[state.period]); }
+  function passes(n){
+    if(!inPeriod(n)) return false;
+    var u=urgency(n);
+    if(state.cat!=="all" && n.category!==state.cat) return false;
+    if(state.stat==="open" && (u.cls==="closed")) return false;
+    if(state.stat==="soon" && !(u.cls==="soon"||u.cls==="today")) return false;
+    if(state.stat==="closed" && u.cls!=="closed") return false;
+    if(state.kw.size){
+      var mk=n.matchedKeywords||[];
+      var hit=false; state.kw.forEach(function(k){ if(mk.indexOf(k)>=0) hit=true; });
+      if(!hit) return false;
+    }
+    if(state.q){
+      var q=state.q.toLowerCase();
+      var hay=((n.bidNtceNm||"")+" "+(n.ntceInsttNm||"")+" "+(n.dminsttNm||"")).toLowerCase();
+      if(hay.indexOf(q)<0) return false;
+    }
+    return true;
+  }
+  function sortList(arr){
+    var s=state.sort;
+    return arr.sort(function(a,b){
+      if(s==="clse-asc"){
+        var ua=urgency(a),ub=urgency(b);
+        var oa=ua.diff<0?1:0, ob=ub.diff<0?1:0;      // 마감된 건 뒤로
+        if(oa!==ob) return oa-ob;
+        return ua.diff-ub.diff;
+      }
+      if(s==="ntce-desc"){ return (parseK(b.bidNtceDt)||0)-(parseK(a.bidNtceDt)||0); }
+      if(s==="price-desc"){ return num(b.presmptPrce)-num(a.presmptPrce); }
+      return 0;
+    });
+  }
+  function num(v){ var n=parseInt(String(v).replace(/[^0-9]/g,""),10); return isNaN(n)?0:n; }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+
+  // ---- render ----
+  function renderKeywords(){
+    var host=document.getElementById("kwList");
+    host.innerHTML = KEYWORDS.map(function(k){
+      var c=NOTICES.filter(function(n){return (n.matchedKeywords||[]).indexOf(k)>=0;}).length;
+      return '<button class="kw" data-kw="'+esc(k)+'" aria-pressed="false">'+esc(k)+' <span class="n">'+c+'</span></button>';
+    }).join("");
+    document.getElementById("kwFootnote").textContent = KEYWORDS.join(" · ");
+    host.querySelectorAll(".kw").forEach(function(b){
+      b.addEventListener("click",function(){
+        var k=b.getAttribute("data-kw");
+        if(state.kw.has(k)){state.kw.delete(k);b.setAttribute("aria-pressed","false");}
+        else{state.kw.add(k);b.setAttribute("aria-pressed","true");}
+        render();
+      });
+    });
+  }
+  function renderStats(){
+    var all=NOTICES.filter(inPeriod);
+    var newC=all.filter(isNew).length;
+    var hot=all.filter(function(n){var u=urgency(n);return u.cls==="soon"||u.cls==="today";}).length;
+    var today=all.filter(function(n){return urgency(n).cls==="today";}).length;
+    var plabel={"1m":"최근 1개월","3m":"최근 3개월","all":"전체 기간"}[state.period];
+    var html=""+
+      stat("",plabel+" 공고",all.length,"건")+
+      stat("new","최근 3일 신규",newC,"건")+
+      stat("hot","마감 임박 (D-7)",hot,"건")+
+      stat("today","오늘 마감",today,"건");
+    document.getElementById("stats").innerHTML=html;
+  }
+  function stat(cls,k,v,unit){
+    return '<div class="stat '+cls+'"><div class="k">'+k+'</div><div class="v">'+v+'<small>'+unit+'</small></div></div>';
+  }
+  function updateScopeMeta(){
+    var pool=NOTICES.filter(inPeriod);
+    var open=pool.filter(function(n){return urgency(n).cls!=="closed";}).length;
+    document.getElementById("scopeCount").innerHTML='이 기간 <b>'+pool.length+'건</b> · 진행중 '+open+'건';
+    document.querySelectorAll("#kwList .kw").forEach(function(b){
+      var k=b.getAttribute("data-kw");
+      var c=pool.filter(function(n){return (n.matchedKeywords||[]).indexOf(k)>=0;}).length;
+      var span=b.querySelector(".n"); if(span) span.textContent=c;
+    });
+  }
+  function render(){
+    var arr=sortList(NOTICES.filter(passes));
+    renderStats();
+    updateScopeMeta();
+    var list=document.getElementById("list");
+    if(!arr.length){
+      list.innerHTML='<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><b>조건에 맞는 공고가 없습니다</b>검색어·필터를 조정해 보세요.</div>';
+      return;
+    }
+    list.innerHTML=arr.map(rowHTML).join("");
+  }
+  function rowHTML(n){
+    var u=urgency(n);
+    var m=money(n.presmptPrce);
+    var kwtags=(n.matchedKeywords||[]).map(function(k){return '<span class="kwtag">'+esc(k)+'</span>';}).join("");
+    var newBadge=isNew(n)?'<span class="badge-new">NEW</span>':"";
+    var url=n.bidNtceDtlUrl||"https://www.g2b.go.kr";
+    var titleEl = url
+      ? '<a class="ttl" href="'+esc(url)+'" target="_blank" rel="noopener">'+esc(n.bidNtceNm)+'</a>'
+      : '<span class="ttl">'+esc(n.bidNtceNm)+'</span>';
+    return ''+
+    '<article class="row u-'+u.cls+'">'+
+      '<div class="cell-main">'+
+        '<div class="title-line">'+titleEl+newBadge+'</div>'+
+        '<div class="meta"><span class="inst">'+esc(n.ntceInsttNm||n.dminsttNm||"—")+'</span>'+
+          '<span class="sep">·</span><span class="no mono">'+esc(n.bidNtceNo||"")+'</span></div>'+
+        (kwtags?'<div class="kwtags">'+kwtags+'</div>':"")+
+      '</div>'+
+      '<div class="cell-cat"><span class="cat-pill">'+esc(n.category||"용역")+'</span></div>'+
+      '<div class="cell-price">'+m.main+(m.main!=="—"?'<small>'+(m.sub||"원")+'</small>':"")+'</div>'+
+      '<div class="cell-date">'+fmtDate(n.bidNtceDt)+'</div>'+
+      '<div class="cell-clse"><span class="dday"><span class="pill '+u.cls+'">'+u.label+'</span><span class="date">'+fmtFull(n.bidClseDt).slice(5)+'</span></span></div>'+
+    '</article>';
+  }
+
+  // ---- status header ----
+  function renderStatus(){
+    var dot=document.getElementById("statusDot");
+    var up=document.getElementById("updatedAt");
+    if(DATA.isSample || !DATA.updatedAt){
+      dot.className="dot"; up.textContent="샘플";
+      document.getElementById("statusText").innerHTML='<b>샘플 미리보기</b>';
+    } else {
+      dot.className="dot live";
+      var dt=parseK(DATA.updatedAt);
+      up.textContent=dt?fmtFull(DATA.updatedAt)+" "+pad(dt.getHours())+":"+pad(dt.getMinutes()):DATA.updatedAt;
+      document.getElementById("statusText").insertAdjacentHTML("beforeend",' <span class="auto">· 매일 09시 자동</span>');
+      document.getElementById("sampleBanner").style.display="none";
+    }
+  }
+  document.getElementById("refreshBtn").addEventListener("click",function(){
+    this.classList.add("spin");
+    setTimeout(function(){ location.reload(); },250);
+  });
+
+  // ---- wire controls ----
+  document.getElementById("q").addEventListener("input",function(e){state.q=e.target.value.trim();render();});
+  document.getElementById("sort").addEventListener("change",function(e){state.sort=e.target.value;render();});
+  document.getElementById("catSeg").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b)return;
+    state.cat=b.getAttribute("data-cat");
+    this.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x===b);});
+    render();
+  });
+  document.getElementById("statSeg").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b)return;
+    state.stat=b.getAttribute("data-stat");
+    this.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x===b);});
+    render();
+  });
+  document.getElementById("periodSeg").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b)return;
+    state.period=b.getAttribute("data-period");
+    this.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",x===b);});
+    render();
+  });
+
+  renderKeywords();
+  renderStatus();
+  render();
+})();
+</script>
